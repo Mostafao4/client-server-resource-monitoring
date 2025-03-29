@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resource Monitoring</title>
+    <meta http-equiv="refresh" content="7"> <!-- Refresh the page every 7 seconds -->
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .alert {
+            background-color: #ffcccc;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Resource Monitoring Dashboard</h1>
+    <table>
+        <tr>
+            <th>Client</th>
+            <th>CPU (%)</th>
+            <th>Memory (%)</th>
+            <th>GPU (%)</th>
+            <th>GPU Temp (&#8451;)</th>
+        </tr>
+        {% for client, data in data.items() %}
+        <tr>
+            <td>{{ client }}</td>
+            <td class="{{ 'alert' if data['CPU_UTIL'] >= thresholds[client]['CPU_UTIL'] }}">{{ data['CPU_UTIL'] }}</td>
+            <td class="{{ 'alert' if data['MEMORY_UTIL'] >= thresholds[client]['MEMORY_UTIL'] }}">{{ data['MEMORY_UTIL'] }}</td>
+            <td class="{{ 'alert' if data['GPU_UTIL'] >= thresholds[client]['GPU_UTIL'] }}">{{ data['GPU_UTIL'] }}</td>
+            <td class="{{ 'alert' if data['GPU_TEMP'] >= thresholds[client]['GPU_TEMP'] }}">{{ data['GPU_TEMP'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <form method="POST" action="/set_thresholds" style="text-align: center; margin: 20px;">
+        <h3>Set Thresholds for a Client</h3>
+        <label for="client">Select Client:</label>
+        <select name="client" id="client">
+            {% for client in data.keys() %}
+            <option value="{{ client }}">{{ client }}</option>
+            {% endfor %}
+        </select><br><br>
+        <label>CPU (0-100):</label><input type="number" name="cpu" step="0.1" min="0" max="100" placeholder="Leave blank to keep current"><br>
+        <label>Memory (0-100):</label><input type="number" name="memory" step="0.1" min="0" max="100" placeholder="Leave blank to keep current"><br>
+        <label>GPU (0-100):</label><input type="number" name="gpu" step="0.1" min="0" max="100" placeholder="Leave blank to keep current"><br>
+        <label>GPU Temp (0-100):</label><input type="number" name="gpu_temp" step="0.1" min="0" max="100" placeholder="Leave blank to keep current"><br><br>
+        <button type="submit">Update Thresholds</button>
+    </form>
+</body>
+</html>
